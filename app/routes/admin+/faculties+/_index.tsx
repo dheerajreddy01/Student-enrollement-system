@@ -1,14 +1,14 @@
 import { PlusIcon } from "@heroicons/react/24/solid"
-import { ActionIcon, Badge, Button, Card, Text } from "@mantine/core"
+import { Badge, Button, Card, Text } from "@mantine/core"
 import { json } from "@remix-run/node"
-import { Form, Link, useLoaderData } from "@remix-run/react"
+import { Link, useLoaderData } from "@remix-run/react"
 import { TailwindContainer } from "~/components/tailwind-container"
 import { prisma } from "~/lib/db.server"
 
 export async function loader() {
   const faculties = await prisma.faculty.findMany({
     include: {
-     schedule: true,
+      schedules: true,
     },
   })
   return json({ faculties })
@@ -47,9 +47,6 @@ export default function ManageFaculties() {
                     <Card shadow="sm" radius="md" withBorder key={faculty.id}>
                       <Text weight={500}>Name: {faculty.name} </Text>
                       <Text weight={500}>Email: {faculty.email} </Text>
-                      {/* <Text weight={500}>
-                        Department: {faculty.schedule.map((schedule) => schedule.)}
-                      </Text> */}
                       <Link to={`/admin/faculties/edit/${faculty.id}`}>
                         <Badge mt="0.5rem" color="pink" variant="light">
                           <Button variant="subtle" loaderPosition="right">
@@ -57,15 +54,6 @@ export default function ManageFaculties() {
                           </Button>
                         </Badge>
                       </Link>
-                      <Form method="post" action="/resources/delete-faculty">
-                        <ActionIcon
-                          type="submit"
-                          name="facultyId"
-                          value={faculty.id}
-                        >
-                          Delete
-                        </ActionIcon>
-                      </Form>
                     </Card>
                   ))}
                 </div>

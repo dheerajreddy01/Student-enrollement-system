@@ -6,6 +6,7 @@ import { json, redirect } from "@remix-run/node"
 import { useFetcher, useLoaderData } from "@remix-run/react"
 import { badRequest } from "remix-utils"
 import { z } from "zod"
+import PageHeading from "~/components/page-heading"
 import { TailwindContainer } from "~/components/tailwind-container"
 import { prisma } from "~/lib/db.server"
 import type { inferErrors } from "~/utils/validation"
@@ -28,7 +29,7 @@ export async function loader({ params }: LoaderArgs) {
     return redirect("/admin/courses")
   }
 
-  return json({  courseToEdit })
+  return json({ courseToEdit })
 }
 
 interface ActionData {
@@ -46,11 +47,7 @@ export const action: ActionFunction = async ({ request }) => {
     return badRequest<ActionData>({ success: false, fieldErrors })
   }
 
-  const {
-    name,
-    credit_hours,
-    courseId,
-  } = fields
+  const { name, credit_hours, courseId } = fields
 
   await prisma.course.update({
     where: {
@@ -66,8 +63,7 @@ export const action: ActionFunction = async ({ request }) => {
 }
 
 export default function EditCourse() {
-  const { courseToEdit } =
-    useLoaderData<typeof loader>()
+  const { courseToEdit } = useLoaderData<typeof loader>()
 
   const fetcher = useFetcher<ActionData>()
   const isSubmitting = fetcher.state !== "idle"
@@ -76,13 +72,12 @@ export default function EditCourse() {
     <>
       <TailwindContainer className="rounded-md bg-white">
         <div className=" px-4 py-10 sm:px-6 lg:px-8">
-          <div className="sm:flex sm:flex-auto sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">
-                Edit Course
-              </h1>
-            </div>
-            <div>
+          <PageHeading
+            title="Edit Course"
+            subtitle="Edit the course."
+            showBackButton
+            to="/admin/courses"
+            rightSection={
               <Button
                 type="submit"
                 form="form"
@@ -91,11 +86,10 @@ export default function EditCourse() {
                 loading={isSubmitting}
                 loaderPosition="left"
               >
-                <PlusIcon className="h-4 w-4" />
-                <span className="ml-2">Update</span>
+                Update
               </Button>
-            </div>
-          </div>
+            }
+          />
         </div>
       </TailwindContainer>
 
@@ -123,7 +117,7 @@ export default function EditCourse() {
               error={fetcher.data?.fieldErrors?.name}
               required
             />
-           
+
             <TextInput
               readOnly
               name="code"

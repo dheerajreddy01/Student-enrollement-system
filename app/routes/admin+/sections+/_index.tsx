@@ -1,9 +1,11 @@
 import { PlusIcon } from "@heroicons/react/24/solid"
-import { ActionIcon, Badge, Button, Card, Text } from "@mantine/core"
+import { Badge, Button, Card, Text } from "@mantine/core"
 import { json } from "@remix-run/node"
-import { Form, Link, useLoaderData } from "@remix-run/react"
+import { Link, useLoaderData } from "@remix-run/react"
+import * as React from "react"
 import { TailwindContainer } from "~/components/tailwind-container"
 import { prisma } from "~/lib/db.server"
+import { formatTime } from "~/utils"
 
 export async function loader() {
   const sections = await prisma.section.findMany({
@@ -11,6 +13,7 @@ export async function loader() {
       course: true,
       room: true,
       faculty: true,
+      schedules: true,
     },
   })
   return json({ sections })
@@ -54,23 +57,23 @@ export default function ManageSections() {
                         <Text weight={500}>
                           Faculty: {section.faculty.name}{" "}
                         </Text>
-                        {/* <Text weight={500}>
-                          Time Slots:
-                          {section.timeSlots.length > 0 ? (
-                            section.timeSlots.map((timeSlot) => (
-                              <React.Fragment key={timeSlot.id}>
-                                <p className="font-bold">{timeSlot.day}</p>
+                        <Text weight={500}>
+                          Schedules:
+                          {section.schedules.length > 0 ? (
+                            section.schedules.map((schedule) => (
+                              <React.Fragment key={schedule.id}>
+                                <p className="font-bold">{schedule.day}</p>
                                 <p>
-                                  {formatTime(timeSlot.startTime!)}
+                                  {formatTime(schedule.startTime!)}
                                   {" - "}
-                                  {formatTime(timeSlot.endTime!)}
+                                  {formatTime(schedule.endTime!)}
                                 </p>
                               </React.Fragment>
                             ))
                           ) : (
                             <p>No time slots</p>
                           )}
-                        </Text> */}
+                        </Text>
                         <Link to={`/admin/sections/edit/${section.id}`}>
                           <Badge mt="0.5rem" color="pink" variant="light">
                             <Button variant="subtle" loaderPosition="right">
@@ -78,21 +81,11 @@ export default function ManageSections() {
                             </Button>
                           </Badge>
                         </Link>
-                        <Form method="post" action="/resources/delete-section">
-                          <ActionIcon
-                            type="submit"
-                            name="sectionId"
-                            value={section.id}
-                          >
-                            Delete
-                          </ActionIcon>
-                        </Form>
                       </Card>
                     ))
                   ) : (
                     <>
                       <p>No sections to Display.</p>
-                      <p>Add Sections</p>
                     </>
                   )}
                 </div>

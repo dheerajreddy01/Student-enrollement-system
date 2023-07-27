@@ -1,12 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { PlusIcon } from "@heroicons/react/24/solid"
-import { Button, PasswordInput, Select, TextInput } from "@mantine/core"
+import {
+  ActionIcon,
+  Button,
+  PasswordInput,
+  Select,
+  TextInput,
+} from "@mantine/core"
 import type { ActionFunction } from "@remix-run/node"
 import { json, redirect } from "@remix-run/node"
-import { useFetcher, useLoaderData } from "@remix-run/react"
+import { Link, useFetcher, useLoaderData } from "@remix-run/react"
 import * as React from "react"
 import { badRequest } from "remix-utils"
 import { z } from "zod"
+import PageHeading from "~/components/page-heading"
 import { TailwindContainer } from "~/components/tailwind-container"
 import { prisma } from "~/lib/db.server"
 import { createPasswordHash } from "~/session.server"
@@ -16,7 +23,6 @@ const CreateFacultySchema = z
   .object({
     facultyId: z.string().optional(),
     name: z.string().min(3, "Name must be at least 3 characters"),
-    departmentId: z.string(),
     email: z.string().email("Please enter a valid email"),
     password: z.string().optional(),
   })
@@ -64,7 +70,7 @@ export const action: ActionFunction = async ({ request }) => {
     return badRequest<ActionData>({ success: false, fieldErrors })
   }
 
-  const { email, name, password, departmentId } = fields
+  const { email, name, password } = fields
 
   await prisma.faculty.create({
     data: {
@@ -78,7 +84,6 @@ export const action: ActionFunction = async ({ request }) => {
 }
 
 export default function CreateFaculty() {
-
   const fetcher = useFetcher<ActionData>()
 
   const [departmentId, setDepartmentId] = React.useState<string | null>(null)
@@ -89,16 +94,12 @@ export default function CreateFaculty() {
     <>
       <TailwindContainer className="rounded-md bg-white">
         <div className=" px-4 py-10 sm:px-6 lg:px-8">
-          <div className="sm:flex sm:flex-auto sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">
-                Manage Faculty
-              </h1>
-              <p className="mt-2 text-sm text-gray-700">
-                A list of all the faculty in the system.
-              </p>
-            </div>
-            <div>
+          <PageHeading
+            title="Create Faculty"
+            subtitle="Create a new faculty."
+            showBackButton
+            to="/admin/faculties"
+            rightSection={
               <Button
                 type="submit"
                 form="form"
@@ -110,8 +111,8 @@ export default function CreateFaculty() {
                 <PlusIcon className="h-4 w-4" />
                 <span className="ml-2">Create</span>
               </Button>
-            </div>
-          </div>
+            }
+          />
         </div>
       </TailwindContainer>
 

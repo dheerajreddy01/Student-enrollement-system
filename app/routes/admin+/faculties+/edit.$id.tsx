@@ -7,6 +7,7 @@ import { useFetcher, useLoaderData } from "@remix-run/react"
 import * as React from "react"
 import { badRequest } from "remix-utils"
 import { z } from "zod"
+import PageHeading from "~/components/page-heading"
 import { TailwindContainer } from "~/components/tailwind-container"
 import { prisma } from "~/lib/db.server"
 import { createPasswordHash } from "~/session.server"
@@ -16,7 +17,6 @@ const EditFacultySchema = z
   .object({
     facultyId: z.string().optional(),
     name: z.string().min(3, "Name must be at least 3 characters"),
-    departmentId: z.string(),
     email: z.string().email("Please enter a valid email"),
     password: z.string().optional(),
   })
@@ -49,14 +49,13 @@ export async function loader({ params }: LoaderArgs) {
     where: {
       id: params.id,
     },
-    
   })
 
   if (!facultyToEdit) {
     return redirect("/admin/faculties")
   }
 
-  return json({  facultyToEdit })
+  return json({ facultyToEdit })
 }
 
 interface ActionData {
@@ -74,7 +73,7 @@ export const action: ActionFunction = async ({ request }) => {
     return badRequest<ActionData>({ success: false, fieldErrors })
   }
 
-  const { email, name, password, departmentId, facultyId } = fields
+  const { email, name, password, facultyId } = fields
 
   if (facultyId) {
     await prisma.faculty.update({
@@ -85,7 +84,7 @@ export const action: ActionFunction = async ({ request }) => {
         name: name,
         email: email,
         password: await createPasswordHash(password!),
-        },
+      },
     })
   }
 
@@ -93,7 +92,7 @@ export const action: ActionFunction = async ({ request }) => {
 }
 
 export default function CreateFaculty() {
-  const {  facultyToEdit } = useLoaderData<typeof loader>()
+  const { facultyToEdit } = useLoaderData<typeof loader>()
 
   const fetcher = useFetcher<ActionData>()
 
@@ -105,26 +104,24 @@ export default function CreateFaculty() {
     <>
       <TailwindContainer className="rounded-md bg-white">
         <div className=" px-4 py-10 sm:px-6 lg:px-8">
-          <div className="sm:flex sm:flex-auto sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">
-                Edit Faculty
-              </h1>
-            </div>
-            <div>
+          <PageHeading
+            title="Edit Faculty"
+            subtitle="Edit the faculty."
+            showBackButton
+            to="/admin/faculties"
+            rightSection={
               <Button
                 type="submit"
                 form="form"
                 variant="filled"
                 color="gray"
-                loading={isSubmitting}
                 loaderPosition="left"
+                loading={isSubmitting}
               >
-                <PlusIcon className="h-4 w-4" />
-                <span className="ml-2">Create</span>
+                Update
               </Button>
-            </div>
-          </div>
+            }
+          />
         </div>
       </TailwindContainer>
 

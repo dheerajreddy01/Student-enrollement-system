@@ -56,7 +56,7 @@ export function useValidateServerTimeslot() {
     if (isConflict) {
       return {
         success: false,
-        error: "Time slot conflicts with existing time slot",
+        error: "Schedule conflicts with existing schedule",
       }
     }
 
@@ -64,67 +64,67 @@ export function useValidateServerTimeslot() {
       success: true,
     }
   }
-  // const handleFacultyConflict = (timeSlot: ITs): boolean => {
-  //   const day = timeSlot.day
-  //   const startTime = timeSlot.startTime
-  //   const endTime = timeSlot.endTime
+  const handleFacultyConflict = (timeSlot: ITs): boolean => {
+    const day = timeSlot.day
+    const startTime = timeSlot.startTime
+    const endTime = timeSlot.endTime
 
-  //   const facultySections = sections.filter(
-  //     (section) => section.facultyId === timeSlot.facultyId,
-  //   )
+    const facultySections = sections.filter(
+      (section) => section.facultyId === timeSlot.facultyId,
+    )
 
-  //   const _startTime = toFixedDate(convertToDateTime(startTime))
-  //   const _endTime = toFixedDate(convertToDateTime(endTime))
+    const _startTime = toFixedDate(convertToDateTime(startTime))
+    const _endTime = toFixedDate(convertToDateTime(endTime))
 
-  //   const facultyTimeSlotsWithSameDay = facultySections.flatMap((section) =>
-  //     section.timeSlots.filter((timeSlot) => timeSlot.day === day),
-  //   )
+    const facultyTimeSlotsWithSameDay = facultySections.flatMap((section) =>
+      section.schedules.filter((schedule) => schedule.day === day),
+    )
 
-  //   const isFacultyAvailable = facultyTimeSlotsWithSameDay.every((slot) => {
-  //     const slotStartTime = new Date(slot.startTime)
-  //     const slotEndTime = new Date(slot.endTime)
+    const isFacultyAvailable = facultyTimeSlotsWithSameDay.every((slot) => {
+      const slotStartTime = new Date(slot.startTime)
+      const slotEndTime = new Date(slot.endTime)
 
-  //     return !(
-  //       (_startTime.getTime() >= slotStartTime.getTime() &&
-  //         _startTime.getTime() < slotEndTime.getTime()) ||
-  //       (_endTime.getTime() > slotStartTime.getTime() &&
-  //         _endTime.getTime() <= slotEndTime.getTime())
-  //     )
-  //   })
+      return !(
+        (_startTime.getTime() >= slotStartTime.getTime() &&
+          _startTime.getTime() < slotEndTime.getTime()) ||
+        (_endTime.getTime() > slotStartTime.getTime() &&
+          _endTime.getTime() <= slotEndTime.getTime())
+      )
+    })
 
-  //   return isFacultyAvailable
-  // }
+    return isFacultyAvailable
+  }
 
-  // const handleRoomConflict = (timeSlot: ITs): boolean => {
-  //   const day = timeSlot.day
-  //   const startTime = timeSlot.startTime
-  //   const endTime = timeSlot.endTime
+  const handleRoomConflict = (timeSlot: ITs): boolean => {
+    const day = timeSlot.day
+    const startTime = timeSlot.startTime
+    const endTime = timeSlot.endTime
 
-  //   const roomSections = sections.filter(
-  //     (section) => section.roomId === timeSlot.roomId,
-  //   )
+    const roomSections = sections.filter(
+      (section) => section.roomId === timeSlot.roomId,
+    )
 
-  //   const _startTime = toFixedDate(convertToDateTime(startTime))
-  //   const _endTime = toFixedDate(convertToDateTime(endTime))
+    const _startTime = toFixedDate(convertToDateTime(startTime))
+    const _endTime = toFixedDate(convertToDateTime(endTime))
 
-  //   const roomTimeSlotsWithSameDay = roomSections.flatMap((section) =>
-  //     section.timeSlots.filter((timeSlot) => timeSlot.day === day),
-  //   )
+    const roomTimeSlotsWithSameDay = roomSections.flatMap((section) =>
+      section.schedules.filter((schedule) => schedule.day === day),
+    )
 
-  //   const isRoomAvailable = roomTimeSlotsWithSameDay.every((slot) => {
-  //     const slotStartTime = new Date(slot.startTime)
-  //     const slotEndTime = new Date(slot.endTime)
+    const isRoomAvailable = roomTimeSlotsWithSameDay.every((slot) => {
+      const slotStartTime = new Date(slot.startTime)
+      const slotEndTime = new Date(slot.endTime)
 
-  //     return !(
-  //       (_startTime.getTime() >= slotStartTime.getTime() &&
-  //         _startTime.getTime() < slotEndTime.getTime()) ||
-  //       (_endTime.getTime() > slotStartTime.getTime() &&
-  //         _endTime.getTime() <= slotEndTime.getTime())
-  //     )
-  //   })
+      return !(
+        (_startTime.getTime() >= slotStartTime.getTime() &&
+          _startTime.getTime() < slotEndTime.getTime()) ||
+        (_endTime.getTime() > slotStartTime.getTime() &&
+          _endTime.getTime() <= slotEndTime.getTime())
+      )
+    })
 
-  //   return isRoomAvailable
-  // }
+    return isRoomAvailable
+  }
 
   const validateTimeSlot = (timeSlot: ITs): ValidationReturnType => {
     const { day, startTime, endTime, facultyId, roomId } = timeSlot
@@ -147,23 +147,23 @@ export function useValidateServerTimeslot() {
       }
     }
 
-    // const isFacultyAvailable = handleFacultyConflict(timeSlot)
+    const isFacultyAvailable = handleFacultyConflict(timeSlot)
 
-    // if (!isFacultyAvailable) {
-    //   return {
-    //     success: false,
-    //     error: "Faculty is not available at this time",
-    //   }
-    // }
+    if (!isFacultyAvailable) {
+      return {
+        success: false,
+        error: "Faculty is not available at this time",
+      }
+    }
 
-    // const isRoomAvailable = handleRoomConflict(timeSlot)
+    const isRoomAvailable = handleRoomConflict(timeSlot)
 
-    // if (!isRoomAvailable) {
-    //   return {
-    //     success: false,
-    //     error: "Room is not available at this time",
-    //   }
-    // }
+    if (!isRoomAvailable) {
+      return {
+        success: false,
+        error: "Room is not available at this time",
+      }
+    }
 
     return {
       success: true,

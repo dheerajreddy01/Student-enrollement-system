@@ -11,6 +11,7 @@ import { prisma } from "~/lib/db.server"
 import type { inferErrors } from "~/utils/validation"
 import { validateAction } from "~/utils/validation"
 import * as React from "react"
+import PageHeading from "~/components/page-heading"
 
 const CreateCourseSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
@@ -33,8 +34,7 @@ export const action: ActionFunction = async ({ request }) => {
     return badRequest<ActionData>({ success: false, fieldErrors })
   }
 
-  const { name, code, credit_hours} =
-    fields
+  const { name, code, credit_hours } = fields
 
   const courseWithSameName = await prisma.course.findFirst({
     where: {
@@ -88,26 +88,25 @@ export default function NewCourse() {
     <>
       <TailwindContainer className="rounded-md bg-white">
         <div className=" px-4 py-10 sm:px-6 lg:px-8">
-          <div className="sm:flex sm:flex-auto sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">
-                Create Course
-              </h1>
-            </div>
-            <div>
+          <PageHeading
+            title="Create Course"
+            subtitle="Create a new course"
+            showBackButton
+            to="/admin/courses"
+            rightSection={
               <Button
                 type="submit"
                 form="form"
                 variant="filled"
                 color="gray"
-                loading={isSubmitting}
                 loaderPosition="left"
+                loading={isSubmitting}
               >
                 <PlusIcon className="h-4 w-4" />
                 <span className="ml-2">Create</span>
               </Button>
-            </div>
-          </div>
+            }
+          />
         </div>
       </TailwindContainer>
 

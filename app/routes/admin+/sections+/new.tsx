@@ -9,6 +9,7 @@ import { badRequest } from "remix-utils"
 import { toast } from "sonner"
 import { v4 as uuidv4 } from "uuid"
 import { z } from "zod"
+import PageHeading from "~/components/page-heading"
 import { TailwindContainer } from "~/components/tailwind-container"
 import { Day } from "~/days"
 import { prisma } from "~/lib/db.server"
@@ -25,7 +26,7 @@ const createSectionSchema = z.object({
   courseId: z.string().nonempty("Course ID is required"),
   roomId: z.string().nonempty("Room ID is required"),
   facultyId: z.string().nonempty("Faculty ID is required"),
-  timeSlots: z
+  schedules: z
     .string()
     .transform((value) => JSON.parse(value))
     .pipe(
@@ -41,8 +42,7 @@ const createSectionSchema = z.object({
 
 export async function loader() {
   const sections = await prisma.section.findMany({
-    include: {
-    },
+    include: {},
   })
   const courses = await prisma.course.findMany({})
   const faculties = await prisma.faculty.findMany({})
@@ -55,7 +55,7 @@ interface ActionData {
   fieldErrors?: inferErrors<typeof createSectionSchema>
 }
 
-type ITimeSlot = {
+type ISchedule = {
   id: string
   day: Day | null
   startTime?: string
@@ -72,7 +72,7 @@ export const action: ActionFunction = async ({ request }) => {
     return badRequest<ActionData>({ success: false, fieldErrors })
   }
 
-  const { code, name, courseId, roomId, facultyId, timeSlots } = fields
+  const { code, name, courseId, roomId, facultyId, schedules } = fields
 
   const existingSection = await prisma.section.findFirst({
     where: {
@@ -89,22 +89,25 @@ export const action: ActionFunction = async ({ request }) => {
     })
   }
 
-  // await prisma.section.create({
-  //   data: {
-  //     code: code,
-  //     name: name,
-  //     courseId: courseId,
-  //     roomId: roomId,
-  //     facultyId: facultyId,
-  //     // timeSlots: {
-  //     //   create: timeSlots.map((timeSlot) => ({
-  //     //     day: timeSlot.day,
-  //     //     startTime: timeSlot.startTime,
-  //     //     endTime: timeSlot.endTime,
-  //     //   })),
-  //     // },
-  //   },
-  // })
+  await prisma.section.create({
+    data: {
+      code: code,
+      name: name,
+      courseId: courseId,
+      roomId: roomId,
+      facultyId: facultyId,
+      schedules: {
+        createMany: {
+          data: schedules.map((schedule) => ({
+            day: schedule.day as Day,
+            startTime: schedule.startTime,
+            endTime: schedule.endTime,
+            facultyId: facultyId,
+          })),
+        },
+      },
+    },
+  })
 
   return redirect("/admin/sections")
 }
@@ -122,8 +125,8 @@ export default function CreateNewSection() {
   const [facultyId, setFacultyId] = React.useState<string | null>("")
   const [roomId, setRoomId] = React.useState<string | null>("")
 
-  const [timeSlots, setTimeSlots] = React.useState<
-    MandatoryFields<ITimeSlot>[]
+  const [schedules, setSchedules] = React.useState<
+    MandatoryFields<ISchedule>[]
   >([])
 
   const isSubmitting = fetcher.state !== "idle"
@@ -137,7 +140,7 @@ export default function CreateNewSection() {
         startTime,
         endTime,
       },
-      timeSlots,
+      schedules,
     )
 
     if (!localTimeslotCheck.success)
@@ -155,7 +158,7 @@ export default function CreateNewSection() {
       return toast.error(data.error)
     }
 
-    setTimeSlots((prev) => [
+    setSchedules((prev) => [
       ...prev,
       {
         id: uuidv4(),
@@ -171,23 +174,19 @@ export default function CreateNewSection() {
   }
 
   const handleRemoveTimeSlot = (id: string) => {
-    setTimeSlots((prev) => prev.filter((timeSlot) => timeSlot.id !== id))
+    setSchedules((prev) => prev.filter((schedule) => schedule.id !== id))
   }
 
   return (
     <>
       <TailwindContainer className="rounded-md bg-white">
         <div className=" px-4 py-10 sm:px-6 lg:px-8">
-          <div className="sm:flex sm:flex-auto sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">
-                Create Section
-              </h1>
-              <p className="mt-2 text-sm text-gray-700">
-                Manage the sections that are available to students.
-              </p>
-            </div>
-            <div>
+          <PageHeading
+            title="Create sections"
+            subtitle="Create the section"
+            showBackButton
+            to="/admin/sections"
+            rightSection={
               <Button
                 type="submit"
                 form="form"
@@ -199,8 +198,8 @@ export default function CreateNewSection() {
                 <PlusIcon className="h-4 w-4" />
                 <span className="ml-2">Create</span>
               </Button>
-            </div>
-          </div>
+            }
+          />
         </div>
       </TailwindContainer>
       <div className="p-8 grid grid-cols-2 gap-12">
@@ -211,8 +210,8 @@ export default function CreateNewSection() {
           >
             <input
               hidden
-              name="timeSlots"
-              value={JSON.stringify(timeSlots)}
+              name="schedules"
+              value={JSON.stringify(schedules)}
               onChange={() => {}}
             />
             <TextInput
@@ -267,22 +266,22 @@ export default function CreateNewSection() {
         </fetcher.Form>
 
         <div className="flex flex-col gap-4">
-          {timeSlots.length > 0 ? (
+          {schedules.length > 0 ? (
             <ol className="flex flex-col gap-2 pb-4 border-b">
-              {timeSlots.map((timeSlot) => (
+              {schedules.map((schedule) => (
                 <li
-                  key={timeSlot.id}
+                  key={schedule.id}
                   className="text-sm space-x-2 flex items-center justify-between border-b rounded-md p-2 bg-slate-300 "
                 >
-                  <span>{timeSlot.day}</span>
+                  <span>{schedule.day}</span>
                   <span>
-                    ({formatTime(timeSlot.startTime)} -{" "}
-                    {formatTime(timeSlot.endTime)})
+                    ({formatTime(schedule.startTime)} -{" "}
+                    {formatTime(schedule.endTime)})
                   </span>
                   <Button
                     variant="filled"
                     color="red"
-                    onClick={() => handleRemoveTimeSlot(timeSlot.id)}
+                    onClick={() => handleRemoveTimeSlot(schedule.id)}
                     className="h-4 w-4"
                   >
                     <XMarkIcon className="h-3 w-3" />
@@ -321,7 +320,7 @@ export default function CreateNewSection() {
             onClick={handleAddTimeSlot}
             disabled={!day || !startTime || !endTime || !facultyId || !roomId}
           >
-            Add Time Slot
+            Add Schedule
           </Button>
         </div>
       </div>

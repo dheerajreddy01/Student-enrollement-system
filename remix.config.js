@@ -13,7 +13,7 @@ module.exports = {
   },
   tailwind: true,
   postcss: true,
-  watchPaths: ["./tailwind.config.ts"],
+  watchPaths: ["./tailwind.config.ts", "./app.config.ts"],
   serverModuleFormat: "cjs",
   serverDependenciesToBundle: ["axios"],
   routes: async (defineRoutes) => {

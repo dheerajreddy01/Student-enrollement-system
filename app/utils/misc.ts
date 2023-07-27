@@ -45,3 +45,10 @@ export function formatDate(date: Date) {
 export type MandatoryFields<T> = {
   [K in keyof T]-?: NonNullable<T[K]>
 }
+
+export function formatTime(date: Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+  }).format(date)
+}

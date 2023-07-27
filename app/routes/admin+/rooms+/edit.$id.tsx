@@ -1,10 +1,10 @@
-import { PlusIcon } from "@heroicons/react/24/solid"
 import { Button, NumberInput, TextInput } from "@mantine/core"
 import type { ActionFunction, LoaderArgs } from "@remix-run/node"
 import { json, redirect } from "@remix-run/node"
 import { useFetcher, useLoaderData } from "@remix-run/react"
 import { badRequest } from "remix-utils"
 import { z } from "zod"
+import PageHeading from "~/components/page-heading"
 import { TailwindContainer } from "~/components/tailwind-container"
 import { prisma } from "~/lib/db.server"
 import { validateAction, type inferErrors } from "~/utils/validation"
@@ -86,28 +86,24 @@ export default function AdminSections() {
     <>
       <TailwindContainer className="rounded-md bg-white">
         <div className=" px-4 py-10 sm:px-6 lg:px-8">
-          <div className="sm:flex sm:flex-auto sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">
-                Manage Rooms
-              </h1>
-              <p className="mt-2 text-sm text-gray-700">
-                A list of all the Rooms.
-              </p>
-            </div>
-            <div>
+          <PageHeading
+            title="Edit Room"
+            subtitle="Edit the room"
+            showBackButton
+            to="/admin/rooms"
+            rightSection={
               <Button
+                type="submit"
+                form="form"
+                loading={isSubmitting}
                 variant="filled"
                 color="gray"
                 loaderPosition="left"
-                type="submit"
-                form="form"
               >
-                <PlusIcon className="h-4 w-4" />
-                <span className="ml-2">Update</span>
+                Update
               </Button>
-            </div>
-          </div>
+            }
+          />
         </div>
       </TailwindContainer>
       <div className="p-8 grid grid-cols-2 gap-12">

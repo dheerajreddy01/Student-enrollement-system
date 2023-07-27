@@ -1,7 +1,7 @@
 import { PlusIcon } from "@heroicons/react/24/solid"
-import { ActionIcon, Badge, Button } from "@mantine/core"
+import { Badge, Button } from "@mantine/core"
 import { json } from "@remix-run/node"
-import { Form, Link, useLoaderData } from "@remix-run/react"
+import { Link, useLoaderData } from "@remix-run/react"
 import { TailwindContainer } from "~/components/tailwind-container"
 import { prisma } from "~/lib/db.server"
 
@@ -79,15 +79,6 @@ export default function AdminSections() {
                                 </Badge>
                               </Link>
                             </div>
-                            <Form method="post" action="/resources/delete-room">
-                              <ActionIcon
-                                type="submit"
-                                name="roomId"
-                                value={room.id}
-                              >
-                                Delete
-                              </ActionIcon>
-                            </Form>
                           </td>
                         </tr>
                       ))}

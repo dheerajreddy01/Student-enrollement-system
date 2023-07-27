@@ -1,20 +1,29 @@
-import { Card } from "@mantine/core"
+import { Button, Card, Text } from "@mantine/core"
 import type { LoaderArgs } from "@remix-run/node"
 import { json } from "@remix-run/node"
 import { useFetcher, useLoaderData } from "@remix-run/react"
 import { badRequest } from "remix-utils"
+import PageHeading from "~/components/page-heading"
 import { TailwindContainer } from "~/components/tailwind-container"
 import { prisma } from "~/lib/db.server"
 import { requireUserId } from "~/session.server"
+import { formatTime } from "~/utils"
 
 export async function loader({ request }: LoaderArgs) {
   const studentId = await requireUserId(request)
-  const studentSections = await prisma.enrollment.findMany({
+  const studentSections = await prisma.section.findMany({
     where: {
-      studentId,
+      enrollments: {
+        some: {
+          studentId,
+        },
+      },
     },
     include: {
-     
+      course: true,
+      faculty: true,
+      room: true,
+      schedules: true,
     },
   })
   return json({ studentSections })
@@ -33,14 +42,14 @@ export async function action({ request }: LoaderArgs) {
 
   console.log({ sectionId, studentId })
 
-  // await prisma.enrollment.delete({
-  //   where: {
-  //     studentId_sectionId: {
-  //       sectionId,
-  //       studentId,
-  //     },
-  //   },
-  // })
+  await prisma.enrollment.delete({
+    where: {
+      studentId_sectionId: {
+        sectionId,
+        studentId,
+      },
+    },
+  })
 
   return json({ success: true })
 }
@@ -54,16 +63,10 @@ export default function ManageSections() {
     <>
       <TailwindContainer className="rounded-md bg-white">
         <div className=" px-4 py-10 sm:px-6 lg:px-8">
-          <div className="sm:flex sm:flex-auto sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">
-                View Your Sections
-              </h1>
-              <p className="mt-2 text-sm text-gray-700">
-                Click on the section to view course materials.
-              </p>
-            </div>
-          </div>
+          <PageHeading
+            title="View sections"
+            subtitle="A list of all the sections that you are enrolled in."
+          />
           <div className="mt-8 flex flex-col">
             <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
@@ -76,39 +79,34 @@ export default function ManageSections() {
                         withBorder
                         key={studentSection.id}
                       >
-                        {/* <Link
-                          to={`/student/my-sections/${studentSection.sectionId}/documents`}
-                        >
-                          <Text size="lg" weight={500}>
-                            Name: {studentSection.section.name}
-                          </Text>
-                          <Text size="sm" weight={500}>
-                            Code: {studentSection.section.code}
-                          </Text>
-                          <Text size="sm" weight={500}>
-                            Faculty: {studentSection.section.faculty.name}
-                          </Text>
-                          <Text size="sm" weight={500}>
-                            Timings:
-                            {studentSection.section.timeSlots.map(
-                              (timeSlot) => (
-                                <div key={timeSlot.id}>
-                                  {timeSlot.day}:{" "}
-                                  {formatTime(timeSlot.startTime)} -{" "}
-                                  {formatTime(timeSlot.endTime)}
-                                </div>
-                              ),
-                            )}
-                          </Text>
-                        </Link> */}
-                        {/* <div className="flex items-center justify-center mt-2">
-                          <ActionIcon
+                        <Text size="lg" weight={500}>
+                          Name: {studentSection.name}
+                        </Text>
+                        <Text size="sm" weight={500}>
+                          Code: {studentSection.code}
+                        </Text>
+                        <Text size="sm" weight={500}>
+                          Faculty: {studentSection.faculty.name}
+                        </Text>
+                        <Text size="sm" weight={500}>
+                          Timings:
+                          {studentSection.schedules.map((schedule) => (
+                            <div key={schedule.id}>
+                              {schedule.day}: {formatTime(schedule.startTime)} -{" "}
+                              {formatTime(schedule.endTime)}
+                            </div>
+                          ))}
+                        </Text>
+                        <div className="flex items-center justify-center mt-2">
+                          <Button
+                            compact
+                            variant="subtle"
                             color="red"
-                            disabled={isSubmitting}
+                            loading={isSubmitting}
                             onClick={() =>
                               fetcher.submit(
                                 {
-                                  sectionId: studentSection.sectionId,
+                                  sectionId: studentSection.id,
                                 },
                                 {
                                   method: "post",
@@ -118,13 +116,13 @@ export default function ManageSections() {
                             }
                           >
                             Drop
-                          </ActionIcon>
-                        </div> */}
+                          </Button>
+                        </div>
                       </Card>
                     ))
                   ) : (
                     <>
-                      <p>No sections to Display.</p>
+                      <p>You are not enrolled in any sections.</p>
                     </>
                   )}
                 </div>

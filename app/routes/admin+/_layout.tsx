@@ -45,7 +45,9 @@ export const loader = async ({ request }: LoaderArgs) => {
 
   const [sections] = await Promise.all([
     prisma.section.findMany({
-
+      include: {
+        schedules: true,
+      },
     }),
   ])
 

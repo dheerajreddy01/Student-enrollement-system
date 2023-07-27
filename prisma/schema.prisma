@@ -29,7 +29,7 @@ model Faculty {
   updatedAt DateTime   @updatedAt
   password  String
   section   Section[]
-  schedule  Schedule[]
+  schedules Schedule[]
 
   @@map("Faculty")
 }
@@ -56,8 +56,7 @@ model Course {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  sections   Section[]
-  Enrollment Enrollment[]
+  sections Section[]
 
   @@map("course")
 }
@@ -88,17 +87,19 @@ model Section {
   faculty     Faculty      @relation(fields: [facultyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   facultyId   String       @db.ObjectId
   enrollments Enrollment[]
-  schedule    Schedule[]
-  TimeSlot    TimeSlot[]
+  schedules   Schedule[]
 
   @@map("section")
 }
 
 model Schedule {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  timeSlots TimeSlot[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  day       String
+  startTime DateTime
+  endTime   DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   faculty   Faculty @relation(fields: [facultyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   facultyId String  @db.ObjectId
@@ -119,29 +120,15 @@ enum Day {
 }
 
 model Enrollment {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  studentId String   @db.ObjectId
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  courseId  String   @db.ObjectId
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  studentId String  @db.ObjectId
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Section   Section  @relation(fields: [sectionId], references: [id])
+  section   Section  @relation(fields: [sectionId], references: [id])
   sectionId String   @db.ObjectId
 
+  @@unique([studentId, sectionId])
   @@map("enrollment")
-}
-
-model TimeSlot {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  day       String
-  startTime DateTime
-  endTime   DateTime
-
-  Schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  scheduleId String   @db.ObjectId
-  Section    Section  @relation(fields: [sectionId], references: [id])
-  sectionId  String   @db.ObjectId
-
-  @@map("timeSlot")
 }

@@ -2,6 +2,7 @@ import { PlusIcon } from "@heroicons/react/24/solid"
 import { Badge, Button, Card, Text } from "@mantine/core"
 import { json } from "@remix-run/node"
 import { Link, useLoaderData } from "@remix-run/react"
+import PageHeading from "~/components/page-heading"
 import { TailwindContainer } from "~/components/tailwind-container"
 import { prisma } from "~/lib/db.server"
 
@@ -18,24 +19,23 @@ export default function ManageCourses() {
     <>
       <TailwindContainer className="rounded-md bg-white">
         <div className=" px-4 py-10 sm:px-6 lg:px-8">
-          <div className="sm:flex sm:flex-auto sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">
-                Manage Courses
-              </h1>
-              <p className="mt-2 text-sm text-gray-700">
-                A list of all the Courses.
-              </p>
-            </div>
-            <Link to="/admin/courses/new">
-              <div>
-                <Button variant="filled" color="gray" loaderPosition="left">
-                  <PlusIcon className="h-4 w-4" />
-                  <span className="ml-2">Create</span>
-                </Button>
-              </div>
-            </Link>
-          </div>
+          <PageHeading
+            title="Manage Courses"
+            subtitle="A list of all the Courses."
+            rightSection={
+              <Button
+                component={Link}
+                to="/admin/courses/new"
+                variant="filled"
+                color="gray"
+                loaderPosition="left"
+              >
+                <PlusIcon className="h-4 w-4" />
+                <span className="ml-2">Create</span>
+              </Button>
+            }
+          />
+
           <div className="mt-8 flex flex-col">
             <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
