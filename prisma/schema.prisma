@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  password  String
+
+  @@map("Admin")
+}
+
+model Faculty {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  password  String
+  section   Section[]
+  schedule  Schedule[]
+
+  @@map("Faculty")
+}
+
+model Student {
+  id               String       @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  email            String       @unique
+  banner_no        String       @unique
+  date_of_birth    DateTime
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  password         String
+  courseEnrollment Enrollment[]
+
+  @@map("Student")
+}
+
+model Course {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  code         String   @unique
+  credit_hours Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sections   Section[]
+  Enrollment Enrollment[]
+
+  @@map("course")
+}
+
+model Room {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  no          String   @unique
+  maxCapacity Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sections Section[]
+
+  @@map("room")
+}
+
+model Section {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  code      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  courseId    String       @db.ObjectId
+  room        Room         @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  roomId      String       @db.ObjectId
+  faculty     Faculty      @relation(fields: [facultyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  facultyId   String       @db.ObjectId
+  enrollments Enrollment[]
+  schedule    Schedule[]
+  TimeSlot    TimeSlot[]
+
+  @@map("section")
+}
+
+model Schedule {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  timeSlots TimeSlot[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  faculty   Faculty @relation(fields: [facultyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  facultyId String  @db.ObjectId
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  sectionId String  @db.ObjectId
+
+  @@map("schedule")
+}
+
+enum Day {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model Enrollment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  studentId String   @db.ObjectId
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  courseId  String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Section   Section  @relation(fields: [sectionId], references: [id])
+  sectionId String   @db.ObjectId
+
+  @@map("enrollment")
+}
+
+model TimeSlot {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  day       String
+  startTime DateTime
+  endTime   DateTime
+
+  Schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  scheduleId String   @db.ObjectId
+  Section    Section  @relation(fields: [sectionId], references: [id])
+  sectionId  String   @db.ObjectId
+
+  @@map("timeSlot")
+}
