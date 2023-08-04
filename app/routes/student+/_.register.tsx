@@ -155,7 +155,7 @@ export const action = async ({ request }: ActionArgs) => {
     )
   }
 
-  if (!dob || !/^\d{4}-\d{2}-\d{2}$/.test(String(dob))) {
+  if (!dob) {
     return json(
       {
         errors: {
@@ -353,7 +353,6 @@ export default function Register() {
             id="dob"
             ref={dobRef}
             name="dob"
-            type="date"
             label="Date of Birth"
             aria-invalid={actionData?.errors?.dob ? true : undefined}
             aria-describedby="dob-error"
