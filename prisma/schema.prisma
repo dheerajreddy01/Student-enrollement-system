@@ -22,14 +22,15 @@ model Admin {
 }
 
 model Faculty {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  email     String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  password  String
-  section   Section[]
-  schedules Schedule[]
+  id                  String     @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  email               String     @unique
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  password            String
+  lastPasswordResetAt DateTime?  @map("last_password_reset_at")
+  section             Section[]
+  schedules           Schedule[]
 
   @@map("Faculty")
 }

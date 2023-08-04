@@ -141,9 +141,7 @@ function CourseRow({
               const isEnrolling =
                 fetcher.submission?.formData?.get("sectionId") === section.id
 
-              if (
-                appConfig.showOtherSectionIfAlreadyEnrolledInCourse == false
-              ) {
+              if (appConfig.showOtherSectionIfAlreadyEnrolledInCourse == true) {
                 if (isEnrolledInSomeSection && !isEnrolledInThisSection)
                   return null
               }

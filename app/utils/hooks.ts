@@ -2,7 +2,6 @@ import type { SerializeFrom } from "@remix-run/node"
 import { useRouteLoaderData } from "@remix-run/react"
 import { type RootLoaderData } from "~/root"
 import { type loader as adminLoaderData } from "~/routes/admin+/_layout"
-import { type loader as sectionLoaderData } from "~/routes/faculty+/sections+/$sectionId+/_layout"
 export function useOptionalAdmin() {
   const { admin } = useRouteLoaderData("root") as RootLoaderData
   return admin
@@ -55,18 +54,4 @@ export function useAdminLoaderData() {
   return useRouteLoaderData("routes/admin+/_layout") as SerializeFrom<
     typeof adminLoaderData
   >
-}
-
-export function useSectionData() {
-  const data = useRouteLoaderData(
-    "routes/faculty+/sections+/$sectionId+/_layout",
-  ) as SerializeFrom<typeof sectionLoaderData>
-
-  if (!data) {
-    throw new Error(
-      "You must use `useSectionData()` inside of a route that has a $sectionId route",
-    )
-  }
-
-  return data
 }
