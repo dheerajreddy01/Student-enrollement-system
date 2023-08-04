@@ -196,7 +196,7 @@ export default function CreateNewSection() {
                 loaderPosition="left"
               >
                 <PlusIcon className="h-4 w-4" />
-                <span className="ml-2">Create</span>
+                <span className="ml-2">Save</span>
               </Button>
             }
           />
