@@ -31,7 +31,7 @@ export default function ManageCourses() {
                 loaderPosition="left"
               >
                 <PlusIcon className="h-4 w-4" />
-                <span className="ml-2">Save</span>
+                <span className="ml-2">Create</span>
               </Button>
             }
           />
