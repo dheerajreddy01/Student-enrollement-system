@@ -26,8 +26,10 @@ export async function loader() {
       },
     },
   })
+
   return json({ courses })
 }
+
 export async function action({ request }: ActionArgs) {
   const formData = await request.formData()
   const studentId = await requireUserId(request)
@@ -39,6 +41,22 @@ export async function action({ request }: ActionArgs) {
     return badRequest({
       success: false,
       message: "Invalid request",
+    })
+  }
+
+  const sectionToAdd = await prisma.section.findFirst({
+    where: {
+      id: sectionId,
+    },
+    include: {
+      schedules: true,
+    },
+  })
+
+  if (!sectionToAdd) {
+    return badRequest({
+      success: false,
+      message: "Invalid section",
     })
   }
 
@@ -57,6 +75,66 @@ export async function action({ request }: ActionArgs) {
       message: "You are already enrolled in one section of this course",
     })
   }
+
+  const enrolledSections = await prisma.section.findMany({
+    where: {
+      enrollments: {
+        some: {
+          studentId,
+        },
+      },
+    },
+    include: {
+      schedules: true,
+    },
+  })
+
+  // const hasAnyConflict = await prisma.section.findFirst({
+  //   where: {
+  //     AND: [
+  //       {
+  //         enrollments: {
+  //           some: {
+  //             studentId,
+  //           },
+  //         },
+  //       },
+  //       {
+  //         schedules: {
+  //           some: {
+  //             day: {
+  //               notIn: sectionToAdd.schedules.map((schedule) => schedule.day),
+  //             },
+  //             startTime: {},
+  //             endTime: {},
+  //           },
+  //         },
+  //       },
+  //     ],
+  //   },
+  // })
+
+  for (const enrolledSection of enrolledSections) {
+    for (const enrolledSchedule of enrolledSection.schedules) {
+      for (const scheduleToAdd of sectionToAdd.schedules) {
+        if (
+          enrolledSchedule.day === scheduleToAdd.day &&
+          ((enrolledSchedule.startTime <= scheduleToAdd.startTime &&
+            enrolledSchedule.endTime > scheduleToAdd.startTime) ||
+            (enrolledSchedule.startTime < scheduleToAdd.endTime &&
+              enrolledSchedule.endTime >= scheduleToAdd.endTime))
+        ) {
+          // There is a conflict in the schedules
+          return badRequest({
+            success: false,
+            message: "Section schedule conflicts with your enrolled sections",
+          })
+        }
+      }
+    }
+  }
+
+  // return json({ success: false })
 
   await prisma.enrollment.create({
     data: {

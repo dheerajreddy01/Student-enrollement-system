@@ -41,9 +41,7 @@ const createSectionSchema = z.object({
 })
 
 export async function loader() {
-  const sections = await prisma.section.findMany({
-    include: {},
-  })
+  const sections = await prisma.section.findMany({})
   const courses = await prisma.course.findMany({})
   const faculties = await prisma.faculty.findMany({})
   const rooms = await prisma.room.findMany({})
@@ -196,7 +194,7 @@ export default function CreateNewSection() {
                 loaderPosition="left"
               >
                 <PlusIcon className="h-4 w-4" />
-                <span className="ml-2">Save</span>
+                <span className="ml-2">Create</span>
               </Button>
             }
           />

@@ -71,9 +71,7 @@ export default function FacultySections() {
                         <Text weight={500}>
                           Course: {facultySection.course.name}
                         </Text>
-                        <Text weight={500}>
-                          Course: {facultySection.room.no}
-                        </Text>
+                        <Text weight={500}>Room: {facultySection.room.no}</Text>
                         <Text weight={500}>
                           Enrolled: {facultySection.enrollments.length}
                         </Text>

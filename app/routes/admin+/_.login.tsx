@@ -137,12 +137,8 @@ export default function LoginPage() {
             id="password"
             ref={passwordRef}
             name="password"
-            type="password"
             label="Password"
             required
-            autoComplete="current-password"
-            aria-invalid={actionData?.errors?.password ? true : undefined}
-            aria-describedby="password-error"
           />
           {actionData?.errors?.password ? (
             <div className="pt-1 text-red-700" id="password-error">
