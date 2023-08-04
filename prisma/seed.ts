@@ -4,12 +4,12 @@ import bcrypt from "bcryptjs"
 const prisma = new PrismaClient()
 
 async function seed() {
-  await prisma.admin.deleteMany()
-  await prisma.faculty.deleteMany()
+  await prisma.enrollment.deleteMany()
+  await prisma.course.deleteMany()
   await prisma.student.deleteMany()
   await prisma.room.deleteMany()
-  await prisma.course.deleteMany()
-  await prisma.enrollment.deleteMany()
+  await prisma.faculty.deleteMany()
+  await prisma.admin.deleteMany()
 
   const hashedPassword = await bcrypt.hash("password", 10)
 
@@ -36,6 +36,9 @@ async function seed() {
       password: hashedPassword,
       banner_no: "700737913",
       date_of_birth: new Date(),
+      address: "1234 Main St",
+      phone_no: "1234567890",
+      education_level: "Undergraduate",
     },
   })
 

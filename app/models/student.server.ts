@@ -34,12 +34,18 @@ export async function createStudent({
   password,
   name,
   banner_no,
+  address,
+  phone_no,
+  education_level,
   dob,
 }: {
   email: Student["email"]
   password: Student["password"]
   name: Student["name"]
   banner_no: Student["banner_no"]
+  phone_no: Student["phone_no"]
+  address: Student["address"]
+  education_level: Student["education_level"]
   dob: Student["date_of_birth"]
 }) {
   const hashedPassword = await createPasswordHash(password)
@@ -49,6 +55,9 @@ export async function createStudent({
       name,
       banner_no,
       date_of_birth: dob,
+      address,
+      phone_no,
+      education_level,
       password: hashedPassword,
     },
   })

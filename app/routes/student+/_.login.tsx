@@ -1,75 +1,82 @@
-import type { ActionArgs, LoaderArgs, V2_MetaFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
-import { useEffect, useRef } from "react";
-import { verifyStudentLogin } from "~/models/student.server";
-import { UserRole } from "~/roles";
+import { PasswordInput, TextInput } from "@mantine/core"
+import type { ActionArgs, LoaderArgs, V2_MetaFunction } from "@remix-run/node"
+import { json, redirect } from "@remix-run/node"
+import { Form, Link, useActionData, useSearchParams } from "@remix-run/react"
+import { useEffect, useRef } from "react"
+import { verifyStudentLogin } from "~/models/student.server"
+import { UserRole } from "~/roles"
 
-import { createUserSession, getUserId, getUserRole, isAdmin, isFaculty, isStudent } from "~/session.server";
-import { safeRedirect, validateEmail } from "~/utils";
+import {
+  createUserSession,
+  getUserId,
+  getUserRole,
+  isAdmin,
+  isFaculty,
+  isStudent,
+} from "~/session.server"
+import { safeRedirect, validateEmail } from "~/utils"
 
 export async function loader({ request }: LoaderArgs) {
-  const userId = await getUserId(request);
-  const userRole = await getUserRole(request);
+  const userId = await getUserId(request)
+  const userRole = await getUserRole(request)
 
   if (!userId || !userRole) {
-    return null;
+    return null
   }
 
   if (await isAdmin(request)) {
-    return redirect("/admin");
+    return redirect("/admin")
   }
 
   if (await isFaculty(request)) {
-    return redirect("/faculty");
+    return redirect("/faculty")
   }
 
   if (await isStudent(request)) {
-    return redirect("/student");
+    return redirect("/student")
   }
 
-  return null;
+  return null
 }
 
-
 export const action = async ({ request }: ActionArgs) => {
-  const formData = await request.formData();
-  const email = formData.get("email");
-  const password = formData.get("password");
-  const redirectTo = safeRedirect(formData.get("redirectTo"), "/");
-  const remember = formData.get("remember");
+  const formData = await request.formData()
+  const email = formData.get("email")
+  const password = formData.get("password")
+  const redirectTo = safeRedirect(formData.get("redirectTo"), "/")
+  const remember = formData.get("remember")
 
   if (!validateEmail(email)) {
     return json(
       { errors: { email: "Email is invalid", password: null } },
-      { status: 400 }
-    );
+      { status: 400 },
+    )
   }
 
   if (typeof password !== "string" || password.length === 0) {
     return json(
       { errors: { email: null, password: "Password is required" } },
-      { status: 400 }
-    );
+      { status: 400 },
+    )
   }
 
   if (password.length < 8) {
     return json(
       { errors: { email: null, password: "Password is too short" } },
-      { status: 400 }
-    );
+      { status: 400 },
+    )
   }
 
   const user = await verifyStudentLogin({
     email,
     password,
-  });
+  })
 
   if (!user) {
     return json(
       { errors: { email: "Invalid email or password", password: null } },
-      { status: 400 }
-    );
+      { status: 400 },
+    )
   }
 
   return createUserSession({
@@ -78,25 +85,25 @@ export const action = async ({ request }: ActionArgs) => {
     request,
     userId: user.id,
     role: UserRole.STUDENT,
-  });
-};
+  })
+}
 
-export const meta: V2_MetaFunction = () => [{ title: "Login" }];
+export const meta: V2_MetaFunction = () => [{ title: "Login" }]
 
 export default function LoginPage() {
-  const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/student";
-  const actionData = useActionData<typeof action>();
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
+  const [searchParams] = useSearchParams()
+  const redirectTo = searchParams.get("redirectTo") || "/student"
+  const actionData = useActionData<typeof action>()
+  const emailRef = useRef<HTMLInputElement>(null)
+  const passwordRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (actionData?.errors?.email) {
-      emailRef.current?.focus();
+      emailRef.current?.focus()
     } else if (actionData?.errors?.password) {
-      passwordRef.current?.focus();
+      passwordRef.current?.focus()
     }
-  }, [actionData]);
+  }, [actionData])
 
   return (
     <div className="flex min-h-full flex-col justify-center">
@@ -105,59 +112,39 @@ export default function LoginPage() {
           <h3>Welcome Student!</h3>
         </div>
         <Form method="post" className="space-y-6">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email address
-            </label>
-            <div className="mt-1">
-              <input
-                ref={emailRef}
-                id="email"
-                required
-                autoFocus={true}
-                name="email"
-                type="email"
-                autoComplete="email"
-                aria-invalid={actionData?.errors?.email ? true : undefined}
-                aria-describedby="email-error"
-                className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
-              />
-              {actionData?.errors?.email ? (
-                <div className="pt-1 text-red-700" id="email-error">
-                  {actionData.errors.email}
-                </div>
-              ) : null}
+          <TextInput
+            ref={emailRef}
+            id="email"
+            required
+            label="Email Address"
+            autoFocus={true}
+            name="email"
+            type="email"
+            autoComplete="email"
+            aria-invalid={actionData?.errors?.email ? true : undefined}
+            aria-describedby="email-error"
+          />
+          {actionData?.errors?.email ? (
+            <div className="pt-1 text-red-700" id="email-error">
+              {actionData.errors.email}
             </div>
-          </div>
+          ) : null}
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
-            <div className="mt-1">
-              <input
-                id="password"
-                ref={passwordRef}
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                aria-invalid={actionData?.errors?.password ? true : undefined}
-                aria-describedby="password-error"
-                className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
-              />
-              {actionData?.errors?.password ? (
-                <div className="pt-1 text-red-700" id="password-error">
-                  {actionData.errors.password}
-                </div>
-              ) : null}
+          <PasswordInput
+            id="password"
+            ref={passwordRef}
+            name="password"
+            type="password"
+            label="Password"
+            autoComplete="current-password"
+            aria-invalid={actionData?.errors?.password ? true : undefined}
+            aria-describedby="password-error"
+          />
+          {actionData?.errors?.password ? (
+            <div className="pt-1 text-red-700" id="password-error">
+              {actionData.errors.password}
             </div>
-          </div>
+          ) : null}
 
           <input type="hidden" name="redirectTo" value={redirectTo} />
           <button
@@ -197,5 +184,5 @@ export default function LoginPage() {
         </Form>
       </div>
     </div>
-  );
+  )
 }
